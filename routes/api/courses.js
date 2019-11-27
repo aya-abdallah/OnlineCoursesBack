@@ -53,7 +53,7 @@ CourseRouter.post("/", auth.required, upload.single('photo'), (req, res) => {
     points: req.body.points,
     description: req.body.description
   });
-  console.log("cats=", req.body.category);
+  console.log("cats=", req.body);
   newCourse
     .save()
     .then(course => {
