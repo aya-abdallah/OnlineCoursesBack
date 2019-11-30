@@ -6,7 +6,6 @@ const session = require("express-session");
 const port = process.env.PORT || 3000;
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
-const keys = require('./config/keys');
 const cors = require("cors")
 const mogoURL =
   process.env.URL ||

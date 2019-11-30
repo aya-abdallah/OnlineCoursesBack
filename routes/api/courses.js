@@ -8,32 +8,32 @@ const CompletedCourse = require("../../models/completedCourse");
 const multer = require('multer');
 const auth = require("../auth");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, new Date().toISOString() + file.originalname);
-  }
-});
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, './uploads/');
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, new Date().toISOString() + file.originalname);
+//   }
+// });
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-    cb(null, true);
-  } else {
-    cb(null, false);
-  }
-}
+// const fileFilter = (req, file, cb) => {
+//   if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' ||file.mimetype === 'image/jpg') {
+//     cb(null, true);
+//   } else {
+//     cb(null, false);
+//   }
+// }
 
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 1024 * 1024 * 5
-  },
-  fileFilter: fileFilter
-});
+// const upload = multer({
+//   storage: storage,
+//   limits: {
+//     fileSize: 1024 * 1024 * 5
+//   },
+//   fileFilter: fileFilter
+// });
 
-
+var upload = multer({ dest: 'uploads/' })
 CourseRouter.get("/", (req, res) => {
   Course.find().then(courses =>
     res.json(courses)
@@ -46,6 +46,7 @@ CourseRouter.post("/", auth.required, upload.single('photo'), (req, res) => {
   if (req.file) {
     photo = req.file.path;
   }
+  console.log("data = ", req.body.category);
 
   const newCourse = new Course({
     photo: photo,
@@ -59,7 +60,7 @@ CourseRouter.post("/", auth.required, upload.single('photo'), (req, res) => {
     .then(course => {
       const newCourseCategory = new CourseCategory({
         courseId: course._id,
-        categoryId: req.body.category
+        categoryId: JSON.parse(req.body.category)
       });
       newCourseCategory.save().then(data => res.json(data)).catch(err => res.json(err));
     }).catch(err => res.json(err));
@@ -79,12 +80,10 @@ CourseRouter.put("/:id", auth.required, upload.single('photo'), (req, res) => {
     course.save().then(course => res.json(course)).catch(err => res.json(err))
 
     CourseCategory.findOne({ courseId: course._id }).then(courseCategory => {
-      courseCategory.categoryId = req.body.category;
+      courseCategory.categoryId = JSON.parse(req.body.category);
       courseCategory.save().then(courseCategory => res.json(courseCategory)).catch(err => res.json(err))
     })
-
   })
-
 })
 
 CourseRouter.delete("/:id", auth.required, (req, res) => {
